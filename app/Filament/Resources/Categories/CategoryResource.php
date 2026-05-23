@@ -15,6 +15,9 @@ use Filament\Schemas\Schema;
 use Filament\Support\Icons\Heroicon;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Table;
+use Filament\Tables\Columns\ImageColumn;
+use Filament\Forms\Components\Textarea;
+use Filament\Forms\Components\FileUpload;
 
 class CategoryResource extends Resource
 {
@@ -24,13 +27,29 @@ class CategoryResource extends Resource
 
     protected static ?string $recordTitleAttribute = 'Category';
 
-    public static function form(Schema $schema): Schema
+    public static function form(Schema $form): Schema
     {
-        return $schema
+        return $form
             ->components([
-                TextInput::make('Category')
+                TextInput::make('nama_kategori')
+                    ->label('Nama Kategori')
+                    ->placeholder('Contoh: Elektronik, Furniture, ATK')
                     ->required()
                     ->maxLength(255),
+
+                Textarea::make('deskripsi')
+                    ->label('Deskripsi Kategori')
+                    ->placeholder('Jelaskan singkat tentang kategori ini')
+                    ->required()
+                    ->rows(3),
+
+                FileUpload::make('image')
+                    ->label('Foto Kategori')
+                    ->image()
+                    ->disk('public')
+                    ->directory('categories')
+                    ->visibility('public')
+                    ->required(),
             ]);
     }
 
@@ -39,23 +58,39 @@ class CategoryResource extends Resource
         return $table
             ->recordTitleAttribute('Category')
             ->columns([
-                TextColumn::make('Category')
-                    ->searchable(),
+                ImageColumn::make('image')
+                    ->label('Foto')
+                    ->disk('public')
+                    ->visibility('public')
+                    ->square(),
+
+                TextColumn::make('nama_kategori')
+                    ->label('Kategori')
+                    ->searchable()
+                    ->sortable(),
+
+                TextColumn::make('deskripsi')
+                    ->label('Deskripsi')
+                    ->limit(50),
+
+                TextColumn::make('created_at')
+                    ->label('Ditambahkan')
+                    ->dateTime('d M Y')
+                    ->sortable(),
             ])
             ->filters([
                 //
             ])
-            ->recordActions([
+            ->actions([
                 EditAction::make(),
                 DeleteAction::make(),
             ])
-            ->toolbarActions([
+            ->bulkActions([
                 BulkActionGroup::make([
                     DeleteBulkAction::make(),
                 ]),
             ]);
     }
-
     public static function getPages(): array
     {
         return [

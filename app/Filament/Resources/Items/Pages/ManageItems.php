@@ -16,4 +16,12 @@ class ManageItems extends ManageRecords
             CreateAction::make(),
         ];
     }
+
+    protected function mutateFormDataBeforeCreate(array $data): array
+    {
+        // Otomatis isi users_id dengan ID admin yang sedang login
+        $data['users_id'] = auth()->id();
+
+        return $data;
+    }
 }
